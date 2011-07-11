@@ -1,0 +1,14 @@
+better readme coming sooooon!
+
+
+Main C code for Twitchie.Comments need lots of work.
+
+The most important file is "tiny_twitchie.c". The rest is just for people that want to use AVR Studio and WinAVR.
+
+If you use any other setup to compile your code, you might want to write your own make file. Best of luck!
+
+instructions.pdf is for the end user and includes electronic assembly instructions.
+
+3D_files include Blender files made with a Makerbot orother 3-D printer in mind.
+
+PCB_files are EAGLE files, with .png preview files. Use these to make the circuit boards.
