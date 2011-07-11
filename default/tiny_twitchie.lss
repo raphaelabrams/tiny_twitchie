@@ -1,0 +1,908 @@
+
+tiny_twitchie.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000460  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000004  00800060  00000460  000004d4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .debug_aranges 00000020  00000000  00000000  000004d8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  3 .debug_pubnames 00000053  00000000  00000000  000004f8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_info   00000309  00000000  00000000  0000054b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_abbrev 00000197  00000000  00000000  00000854  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_line   00000217  00000000  00000000  000009eb  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_frame  00000060  00000000  00000000  00000c04  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_str    000000e3  00000000  00000000  00000c64  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_loc    00000108  00000000  00000000  00000d47  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
+   2:	20 c0       	rjmp	.+64     	; 0x44 <__bad_interrupt>
+   4:	1f c0       	rjmp	.+62     	; 0x44 <__bad_interrupt>
+   6:	1e c0       	rjmp	.+60     	; 0x44 <__bad_interrupt>
+   8:	1d c0       	rjmp	.+58     	; 0x44 <__bad_interrupt>
+   a:	1c c0       	rjmp	.+56     	; 0x44 <__bad_interrupt>
+   c:	1b c0       	rjmp	.+54     	; 0x44 <__bad_interrupt>
+   e:	1a c0       	rjmp	.+52     	; 0x44 <__bad_interrupt>
+  10:	19 c0       	rjmp	.+50     	; 0x44 <__bad_interrupt>
+  12:	18 c0       	rjmp	.+48     	; 0x44 <__bad_interrupt>
+  14:	17 c0       	rjmp	.+46     	; 0x44 <__bad_interrupt>
+  16:	16 c0       	rjmp	.+44     	; 0x44 <__bad_interrupt>
+  18:	15 c0       	rjmp	.+42     	; 0x44 <__bad_interrupt>
+  1a:	14 c0       	rjmp	.+40     	; 0x44 <__bad_interrupt>
+  1c:	13 c0       	rjmp	.+38     	; 0x44 <__bad_interrupt>
+
+0000001e <__ctors_end>:
+  1e:	11 24       	eor	r1, r1
+  20:	1f be       	out	0x3f, r1	; 63
+  22:	cf e5       	ldi	r28, 0x5F	; 95
+  24:	d2 e0       	ldi	r29, 0x02	; 2
+  26:	de bf       	out	0x3e, r29	; 62
+  28:	cd bf       	out	0x3d, r28	; 61
+
+0000002a <__do_copy_data>:
+  2a:	10 e0       	ldi	r17, 0x00	; 0
+  2c:	a0 e6       	ldi	r26, 0x60	; 96
+  2e:	b0 e0       	ldi	r27, 0x00	; 0
+  30:	e0 e6       	ldi	r30, 0x60	; 96
+  32:	f4 e0       	ldi	r31, 0x04	; 4
+  34:	02 c0       	rjmp	.+4      	; 0x3a <.do_copy_data_start>
+
+00000036 <.do_copy_data_loop>:
+  36:	05 90       	lpm	r0, Z+
+  38:	0d 92       	st	X+, r0
+
+0000003a <.do_copy_data_start>:
+  3a:	a4 36       	cpi	r26, 0x64	; 100
+  3c:	b1 07       	cpc	r27, r17
+  3e:	d9 f7       	brne	.-10     	; 0x36 <.do_copy_data_loop>
+  40:	91 d0       	rcall	.+290    	; 0x164 <main>
+  42:	0c c2       	rjmp	.+1048   	; 0x45c <_exit>
+
+00000044 <__bad_interrupt>:
+  44:	dd cf       	rjmp	.-70     	; 0x0 <__vectors>
+
+00000046 <delay_us>:
+//The notes on the delay routine above also apply to this one.
+
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+  46:	df 93       	push	r29
+  48:	cf 93       	push	r28
+  4a:	0f 92       	push	r0
+  4c:	cd b7       	in	r28, 0x3d	; 61
+  4e:	de b7       	in	r29, 0x3e	; 62
+  50:	9b 01       	movw	r18, r22
+  52:	ac 01       	movw	r20, r24
+
+volatile unsigned char x=0;
+  54:	19 82       	std	Y+1, r1	; 0x01
+  56:	07 c0       	rjmp	.+14     	; 0x66 <delay_us+0x20>
+	for(;reps!=0;reps--){
+
+			x++;
+  58:	89 81       	ldd	r24, Y+1	; 0x01
+  5a:	8f 5f       	subi	r24, 0xFF	; 255
+  5c:	89 83       	std	Y+1, r24	; 0x01
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+  5e:	21 50       	subi	r18, 0x01	; 1
+  60:	30 40       	sbci	r19, 0x00	; 0
+  62:	40 40       	sbci	r20, 0x00	; 0
+  64:	50 40       	sbci	r21, 0x00	; 0
+  66:	21 15       	cp	r18, r1
+  68:	31 05       	cpc	r19, r1
+  6a:	41 05       	cpc	r20, r1
+  6c:	51 05       	cpc	r21, r1
+  6e:	a1 f7       	brne	.-24     	; 0x58 <delay_us+0x12>
+
+			x++;
+	}
+
+}
+  70:	0f 90       	pop	r0
+  72:	cf 91       	pop	r28
+  74:	df 91       	pop	r29
+  76:	08 95       	ret
+
+00000078 <led_blink>:
+	}
+}
+
+*/
+
+void led_blink (void){
+  78:	df 93       	push	r29
+  7a:	cf 93       	push	r28
+  7c:	0f 92       	push	r0
+  7e:	cd b7       	in	r28, 0x3d	; 61
+  80:	de b7       	in	r29, 0x3e	; 62
+}
+
+
+
+static inline void led_on(void){ 
+	PORTB |= (0x01<<LEDPIN);
+  82:	c3 9a       	sbi	0x18, 3	; 24
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+  84:	19 82       	std	Y+1, r1	; 0x01
+  86:	20 e0       	ldi	r18, 0x00	; 0
+  88:	30 e0       	ldi	r19, 0x00	; 0
+	for(;reps!=0;reps--){
+
+			x++;
+  8a:	89 81       	ldd	r24, Y+1	; 0x01
+  8c:	8f 5f       	subi	r24, 0xFF	; 255
+  8e:	89 83       	std	Y+1, r24	; 0x01
+  90:	2f 5f       	subi	r18, 0xFF	; 255
+  92:	3f 4f       	sbci	r19, 0xFF	; 255
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+  94:	83 e0       	ldi	r24, 0x03	; 3
+  96:	28 3e       	cpi	r18, 0xE8	; 232
+  98:	38 07       	cpc	r19, r24
+  9a:	b9 f7       	brne	.-18     	; 0x8a <led_blink+0x12>
+	PORTB |= (0x01<<LEDPIN);
+
+}
+
+static inline void led_off(void){
+	PORTB &= (0xfe<<LEDPIN);
+  9c:	88 b3       	in	r24, 0x18	; 24
+  9e:	80 7f       	andi	r24, 0xF0	; 240
+  a0:	88 bb       	out	0x18, r24	; 24
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+  a2:	19 82       	std	Y+1, r1	; 0x01
+  a4:	20 e0       	ldi	r18, 0x00	; 0
+  a6:	30 e0       	ldi	r19, 0x00	; 0
+	for(;reps!=0;reps--){
+
+			x++;
+  a8:	89 81       	ldd	r24, Y+1	; 0x01
+  aa:	8f 5f       	subi	r24, 0xFF	; 255
+  ac:	89 83       	std	Y+1, r24	; 0x01
+  ae:	2f 5f       	subi	r18, 0xFF	; 255
+  b0:	3f 4f       	sbci	r19, 0xFF	; 255
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+  b2:	87 e2       	ldi	r24, 0x27	; 39
+  b4:	20 31       	cpi	r18, 0x10	; 16
+  b6:	38 07       	cpc	r19, r24
+  b8:	b9 f7       	brne	.-18     	; 0xa8 <led_blink+0x30>
+	delay_us(1000);
+
+	led_off();
+	delay_us(10000);
+
+}
+  ba:	0f 90       	pop	r0
+  bc:	cf 91       	pop	r28
+  be:	df 91       	pop	r29
+  c0:	08 95       	ret
+
+000000c2 <servo>:
+
+//At 255, the servo will go to 180 degrees.
+
+//127 givs an angle of 90 degrees.
+
+void servo(char pin, unsigned char angle){   
+  c2:	df 93       	push	r29
+  c4:	cf 93       	push	r28
+  c6:	0f 92       	push	r0
+  c8:	cd b7       	in	r28, 0x3d	; 61
+  ca:	de b7       	in	r29, 0x3e	; 62
+  cc:	48 2f       	mov	r20, r24
+
+	PORTB |= (0x01<<pin);
+  ce:	28 b3       	in	r18, 0x18	; 24
+  d0:	81 e0       	ldi	r24, 0x01	; 1
+  d2:	90 e0       	ldi	r25, 0x00	; 0
+  d4:	04 2e       	mov	r0, r20
+  d6:	02 c0       	rjmp	.+4      	; 0xdc <servo+0x1a>
+  d8:	88 0f       	add	r24, r24
+  da:	99 1f       	adc	r25, r25
+  dc:	0a 94       	dec	r0
+  de:	e2 f7       	brpl	.-8      	; 0xd8 <servo+0x16>
+  e0:	28 2b       	or	r18, r24
+  e2:	28 bb       	out	0x18, r18	; 24
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+  e4:	19 82       	std	Y+1, r1	; 0x01
+  e6:	20 e0       	ldi	r18, 0x00	; 0
+  e8:	30 e0       	ldi	r19, 0x00	; 0
+	for(;reps!=0;reps--){
+
+			x++;
+  ea:	89 81       	ldd	r24, Y+1	; 0x01
+  ec:	8f 5f       	subi	r24, 0xFF	; 255
+  ee:	89 83       	std	Y+1, r24	; 0x01
+  f0:	2f 5f       	subi	r18, 0xFF	; 255
+  f2:	3f 4f       	sbci	r19, 0xFF	; 255
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+  f4:	83 e0       	ldi	r24, 0x03	; 3
+  f6:	28 3e       	cpi	r18, 0xE8	; 232
+  f8:	38 07       	cpc	r19, r24
+  fa:	b9 f7       	brne	.-18     	; 0xea <servo+0x28>
+  fc:	0c c0       	rjmp	.+24     	; 0x116 <servo+0x54>
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+  fe:	19 82       	std	Y+1, r1	; 0x01
+ 100:	20 e0       	ldi	r18, 0x00	; 0
+ 102:	30 e0       	ldi	r19, 0x00	; 0
+	for(;reps!=0;reps--){
+
+			x++;
+ 104:	89 81       	ldd	r24, Y+1	; 0x01
+ 106:	8f 5f       	subi	r24, 0xFF	; 255
+ 108:	89 83       	std	Y+1, r24	; 0x01
+ 10a:	2f 5f       	subi	r18, 0xFF	; 255
+ 10c:	3f 4f       	sbci	r19, 0xFF	; 255
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+ 10e:	26 30       	cpi	r18, 0x06	; 6
+ 110:	31 05       	cpc	r19, r1
+ 112:	c1 f7       	brne	.-16     	; 0x104 <servo+0x42>
+
+	PORTB |= (0x01<<pin);
+
+	delay_us(1000);
+
+	for(;angle>0;angle--){
+ 114:	61 50       	subi	r22, 0x01	; 1
+ 116:	66 23       	and	r22, r22
+ 118:	91 f7       	brne	.-28     	; 0xfe <servo+0x3c>
+
+		delay_us(6);
+
+	}
+
+	PORTB &= (0xfe<<pin);
+ 11a:	28 b3       	in	r18, 0x18	; 24
+ 11c:	8e ef       	ldi	r24, 0xFE	; 254
+ 11e:	90 e0       	ldi	r25, 0x00	; 0
+ 120:	02 c0       	rjmp	.+4      	; 0x126 <servo+0x64>
+ 122:	88 0f       	add	r24, r24
+ 124:	99 1f       	adc	r25, r25
+ 126:	4a 95       	dec	r20
+ 128:	e2 f7       	brpl	.-8      	; 0x122 <servo+0x60>
+ 12a:	28 23       	and	r18, r24
+ 12c:	28 bb       	out	0x18, r18	; 24
+
+}
+ 12e:	0f 90       	pop	r0
+ 130:	cf 91       	pop	r28
+ 132:	df 91       	pop	r29
+ 134:	08 95       	ret
+
+00000136 <limited_random>:
+
+
+
+
+
+unsigned char limited_random(unsigned char a, unsigned char b){
+ 136:	0f 93       	push	r16
+ 138:	1f 93       	push	r17
+ 13a:	18 2f       	mov	r17, r24
+ 13c:	06 2f       	mov	r16, r22
+
+unsigned int temp;
+ 
+//	static unsigned long random_seed=1329; //interstella!
+	if(b<a){temp=a;a=b;b=temp;}
+ 13e:	68 17       	cp	r22, r24
+ 140:	10 f4       	brcc	.+4      	; 0x146 <limited_random+0x10>
+ 142:	01 2f       	mov	r16, r17
+ 144:	16 2f       	mov	r17, r22
+
+	if(b==a){return a;}
+ 146:	01 17       	cp	r16, r17
+ 148:	49 f0       	breq	.+18     	; 0x15c <limited_random+0x26>
+//  	return (unsigned char)(random_seed); 
+
+
+
+//	return( (unsigned char)random_seed % ((b-a)+1)) +a;
+	return( rand() % ((b-a)+1)) +a;
+ 14a:	ec d0       	rcall	.+472    	; 0x324 <rand>
+ 14c:	60 2f       	mov	r22, r16
+ 14e:	70 e0       	ldi	r23, 0x00	; 0
+ 150:	6f 5f       	subi	r22, 0xFF	; 255
+ 152:	7f 4f       	sbci	r23, 0xFF	; 255
+ 154:	61 1b       	sub	r22, r17
+ 156:	71 09       	sbc	r23, r1
+ 158:	74 d0       	rcall	.+232    	; 0x242 <__divmodhi4>
+ 15a:	18 0f       	add	r17, r24
+	
+//
+//	return (unsigned char)rand()%100;
+}
+ 15c:	81 2f       	mov	r24, r17
+ 15e:	1f 91       	pop	r17
+ 160:	0f 91       	pop	r16
+ 162:	08 95       	ret
+
+00000164 <main>:
+
+//main///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+int main(void) {
+ 164:	df 92       	push	r13
+ 166:	ef 92       	push	r14
+ 168:	ff 92       	push	r15
+ 16a:	0f 93       	push	r16
+ 16c:	1f 93       	push	r17
+ 16e:	df 93       	push	r29
+ 170:	cf 93       	push	r28
+ 172:	0f 92       	push	r0
+ 174:	cd b7       	in	r28, 0x3d	; 61
+ 176:	de b7       	in	r29, 0x3e	; 62
+
+
+
+	DDRB = 0b001111;					//initialize the IO port pins
+ 178:	8f e0       	ldi	r24, 0x0F	; 15
+ 17a:	87 bb       	out	0x17, r24	; 23
+										//I like to use binary because it's easy to see right away which way pins are set. 
+
+										//settind a pin to zero makes it an input, setting to one makes it an output.
+
+
+	PORTB=0;
+ 17c:	18 ba       	out	0x18, r1	; 24
+	while(1){							//Infinite loop. The code does whatever is in here until power is removed or the chip is reset.
+
+	
+
+		
+		unsigned char loop=limited_random(1,30);
+ 17e:	81 e0       	ldi	r24, 0x01	; 1
+ 180:	6e e1       	ldi	r22, 0x1E	; 30
+ 182:	d9 df       	rcall	.-78     	; 0x136 <limited_random>
+ 184:	08 2f       	mov	r16, r24
+ 186:	2a c0       	rjmp	.+84     	; 0x1dc <main+0x78>
+		
+		for(;loop>0;loop--){
+			char x=limited_random(3,20);
+ 188:	83 e0       	ldi	r24, 0x03	; 3
+ 18a:	64 e1       	ldi	r22, 0x14	; 20
+ 18c:	d4 df       	rcall	.-88     	; 0x136 <limited_random>
+ 18e:	18 2f       	mov	r17, r24
+			char y=limited_random(0,180);
+ 190:	80 e0       	ldi	r24, 0x00	; 0
+ 192:	64 eb       	ldi	r22, 0xB4	; 180
+ 194:	d0 df       	rcall	.-96     	; 0x136 <limited_random>
+ 196:	d8 2e       	mov	r13, r24
+			char z=limited_random(0,180);
+ 198:	80 e0       	ldi	r24, 0x00	; 0
+ 19a:	64 eb       	ldi	r22, 0xB4	; 180
+ 19c:	cc df       	rcall	.-104    	; 0x136 <limited_random>
+ 19e:	e8 2e       	mov	r14, r24
+			char zz=limited_random(0,180);
+ 1a0:	80 e0       	ldi	r24, 0x00	; 0
+ 1a2:	64 eb       	ldi	r22, 0xB4	; 180
+ 1a4:	c8 df       	rcall	.-112    	; 0x136 <limited_random>
+ 1a6:	f8 2e       	mov	r15, r24
+ 1a8:	16 c0       	rjmp	.+44     	; 0x1d6 <main+0x72>
+			for(;x>0;x--){
+				servo(SERVO1,y);
+ 1aa:	80 e0       	ldi	r24, 0x00	; 0
+ 1ac:	6d 2d       	mov	r22, r13
+ 1ae:	89 df       	rcall	.-238    	; 0xc2 <servo>
+				servo(SERVO2,z);
+ 1b0:	81 e0       	ldi	r24, 0x01	; 1
+ 1b2:	6e 2d       	mov	r22, r14
+ 1b4:	86 df       	rcall	.-244    	; 0xc2 <servo>
+				servo(SERVO3,zz);
+ 1b6:	82 e0       	ldi	r24, 0x02	; 2
+ 1b8:	6f 2d       	mov	r22, r15
+ 1ba:	83 df       	rcall	.-250    	; 0xc2 <servo>
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+ 1bc:	19 82       	std	Y+1, r1	; 0x01
+ 1be:	20 e0       	ldi	r18, 0x00	; 0
+ 1c0:	30 e0       	ldi	r19, 0x00	; 0
+	for(;reps!=0;reps--){
+
+			x++;
+ 1c2:	89 81       	ldd	r24, Y+1	; 0x01
+ 1c4:	8f 5f       	subi	r24, 0xFF	; 255
+ 1c6:	89 83       	std	Y+1, r24	; 0x01
+ 1c8:	2f 5f       	subi	r18, 0xFF	; 255
+ 1ca:	3f 4f       	sbci	r19, 0xFF	; 255
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+ 1cc:	87 e2       	ldi	r24, 0x27	; 39
+ 1ce:	20 31       	cpi	r18, 0x10	; 16
+ 1d0:	38 07       	cpc	r19, r24
+ 1d2:	b9 f7       	brne	.-18     	; 0x1c2 <main+0x5e>
+		for(;loop>0;loop--){
+			char x=limited_random(3,20);
+			char y=limited_random(0,180);
+			char z=limited_random(0,180);
+			char zz=limited_random(0,180);
+			for(;x>0;x--){
+ 1d4:	11 50       	subi	r17, 0x01	; 1
+ 1d6:	11 23       	and	r17, r17
+ 1d8:	41 f7       	brne	.-48     	; 0x1aa <main+0x46>
+	
+
+		
+		unsigned char loop=limited_random(1,30);
+		
+		for(;loop>0;loop--){
+ 1da:	01 50       	subi	r16, 0x01	; 1
+ 1dc:	00 23       	and	r16, r16
+ 1de:	a1 f6       	brne	.-88     	; 0x188 <main+0x24>
+}
+
+
+
+static inline void led_on(void){ 
+	PORTB |= (0x01<<LEDPIN);
+ 1e0:	c3 9a       	sbi	0x18, 3	; 24
+				delay_us(10000);
+//				led_blink();
+			}
+		}
+		led_on();
+		delay_us(limited_random(1,30)*1000);
+ 1e2:	81 e0       	ldi	r24, 0x01	; 1
+ 1e4:	6e e1       	ldi	r22, 0x1E	; 30
+ 1e6:	a7 df       	rcall	.-178    	; 0x136 <limited_random>
+ 1e8:	90 e0       	ldi	r25, 0x00	; 0
+ 1ea:	68 ee       	ldi	r22, 0xE8	; 232
+ 1ec:	73 e0       	ldi	r23, 0x03	; 3
+ 1ee:	17 d0       	rcall	.+46     	; 0x21e <__mulhi3>
+ 1f0:	9c 01       	movw	r18, r24
+ 1f2:	44 27       	eor	r20, r20
+ 1f4:	37 fd       	sbrc	r19, 7
+ 1f6:	40 95       	com	r20
+ 1f8:	54 2f       	mov	r21, r20
+
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+ 1fa:	19 82       	std	Y+1, r1	; 0x01
+ 1fc:	07 c0       	rjmp	.+14     	; 0x20c <main+0xa8>
+	for(;reps!=0;reps--){
+
+			x++;
+ 1fe:	89 81       	ldd	r24, Y+1	; 0x01
+ 200:	8f 5f       	subi	r24, 0xFF	; 255
+ 202:	89 83       	std	Y+1, r24	; 0x01
+//microeconds! one MILLIONTH of a second! Muah Ha Ha!
+
+void delay_us(unsigned long reps){  //at 9.6mhz this is pretty close to 1uS per rep. Compiler has to be optimized to S.
+
+volatile unsigned char x=0;
+	for(;reps!=0;reps--){
+ 204:	21 50       	subi	r18, 0x01	; 1
+ 206:	30 40       	sbci	r19, 0x00	; 0
+ 208:	40 40       	sbci	r20, 0x00	; 0
+ 20a:	50 40       	sbci	r21, 0x00	; 0
+ 20c:	21 15       	cp	r18, r1
+ 20e:	31 05       	cpc	r19, r1
+ 210:	41 05       	cpc	r20, r1
+ 212:	51 05       	cpc	r21, r1
+ 214:	a1 f7       	brne	.-24     	; 0x1fe <main+0x9a>
+	PORTB |= (0x01<<LEDPIN);
+
+}
+
+static inline void led_off(void){
+	PORTB &= (0xfe<<LEDPIN);
+ 216:	88 b3       	in	r24, 0x18	; 24
+ 218:	80 7f       	andi	r24, 0xF0	; 240
+ 21a:	88 bb       	out	0x18, r24	; 24
+ 21c:	b0 cf       	rjmp	.-160    	; 0x17e <main+0x1a>
+
+0000021e <__mulhi3>:
+ 21e:	55 27       	eor	r21, r21
+ 220:	00 24       	eor	r0, r0
+
+00000222 <__mulhi3_loop>:
+ 222:	80 ff       	sbrs	r24, 0
+ 224:	02 c0       	rjmp	.+4      	; 0x22a <__mulhi3_skip1>
+ 226:	06 0e       	add	r0, r22
+ 228:	57 1f       	adc	r21, r23
+
+0000022a <__mulhi3_skip1>:
+ 22a:	66 0f       	add	r22, r22
+ 22c:	77 1f       	adc	r23, r23
+ 22e:	61 15       	cp	r22, r1
+ 230:	71 05       	cpc	r23, r1
+ 232:	21 f0       	breq	.+8      	; 0x23c <__mulhi3_exit>
+ 234:	96 95       	lsr	r25
+ 236:	87 95       	ror	r24
+ 238:	00 97       	sbiw	r24, 0x00	; 0
+ 23a:	99 f7       	brne	.-26     	; 0x222 <__mulhi3_loop>
+
+0000023c <__mulhi3_exit>:
+ 23c:	95 2f       	mov	r25, r21
+ 23e:	80 2d       	mov	r24, r0
+ 240:	08 95       	ret
+
+00000242 <__divmodhi4>:
+ 242:	97 fb       	bst	r25, 7
+ 244:	09 2e       	mov	r0, r25
+ 246:	07 26       	eor	r0, r23
+ 248:	0a d0       	rcall	.+20     	; 0x25e <__divmodhi4_neg1>
+ 24a:	77 fd       	sbrc	r23, 7
+ 24c:	04 d0       	rcall	.+8      	; 0x256 <__divmodhi4_neg2>
+ 24e:	0c d0       	rcall	.+24     	; 0x268 <__udivmodhi4>
+ 250:	06 d0       	rcall	.+12     	; 0x25e <__divmodhi4_neg1>
+ 252:	00 20       	and	r0, r0
+ 254:	1a f4       	brpl	.+6      	; 0x25c <__divmodhi4_exit>
+
+00000256 <__divmodhi4_neg2>:
+ 256:	70 95       	com	r23
+ 258:	61 95       	neg	r22
+ 25a:	7f 4f       	sbci	r23, 0xFF	; 255
+
+0000025c <__divmodhi4_exit>:
+ 25c:	08 95       	ret
+
+0000025e <__divmodhi4_neg1>:
+ 25e:	f6 f7       	brtc	.-4      	; 0x25c <__divmodhi4_exit>
+ 260:	90 95       	com	r25
+ 262:	81 95       	neg	r24
+ 264:	9f 4f       	sbci	r25, 0xFF	; 255
+ 266:	08 95       	ret
+
+00000268 <__udivmodhi4>:
+ 268:	aa 1b       	sub	r26, r26
+ 26a:	bb 1b       	sub	r27, r27
+ 26c:	51 e1       	ldi	r21, 0x11	; 17
+ 26e:	07 c0       	rjmp	.+14     	; 0x27e <__udivmodhi4_ep>
+
+00000270 <__udivmodhi4_loop>:
+ 270:	aa 1f       	adc	r26, r26
+ 272:	bb 1f       	adc	r27, r27
+ 274:	a6 17       	cp	r26, r22
+ 276:	b7 07       	cpc	r27, r23
+ 278:	10 f0       	brcs	.+4      	; 0x27e <__udivmodhi4_ep>
+ 27a:	a6 1b       	sub	r26, r22
+ 27c:	b7 0b       	sbc	r27, r23
+
+0000027e <__udivmodhi4_ep>:
+ 27e:	88 1f       	adc	r24, r24
+ 280:	99 1f       	adc	r25, r25
+ 282:	5a 95       	dec	r21
+ 284:	a9 f7       	brne	.-22     	; 0x270 <__udivmodhi4_loop>
+ 286:	80 95       	com	r24
+ 288:	90 95       	com	r25
+ 28a:	bc 01       	movw	r22, r24
+ 28c:	cd 01       	movw	r24, r26
+ 28e:	08 95       	ret
+
+00000290 <do_rand>:
+ 290:	a0 e0       	ldi	r26, 0x00	; 0
+ 292:	b0 e0       	ldi	r27, 0x00	; 0
+ 294:	ed e4       	ldi	r30, 0x4D	; 77
+ 296:	f1 e0       	ldi	r31, 0x01	; 1
+ 298:	90 c0       	rjmp	.+288    	; 0x3ba <__prologue_saves__+0x10>
+ 29a:	ec 01       	movw	r28, r24
+ 29c:	a8 80       	ld	r10, Y
+ 29e:	b9 80       	ldd	r11, Y+1	; 0x01
+ 2a0:	ca 80       	ldd	r12, Y+2	; 0x02
+ 2a2:	db 80       	ldd	r13, Y+3	; 0x03
+ 2a4:	a1 14       	cp	r10, r1
+ 2a6:	b1 04       	cpc	r11, r1
+ 2a8:	c1 04       	cpc	r12, r1
+ 2aa:	d1 04       	cpc	r13, r1
+ 2ac:	41 f4       	brne	.+16     	; 0x2be <do_rand+0x2e>
+ 2ae:	84 e2       	ldi	r24, 0x24	; 36
+ 2b0:	a8 2e       	mov	r10, r24
+ 2b2:	89 ed       	ldi	r24, 0xD9	; 217
+ 2b4:	b8 2e       	mov	r11, r24
+ 2b6:	8b e5       	ldi	r24, 0x5B	; 91
+ 2b8:	c8 2e       	mov	r12, r24
+ 2ba:	87 e0       	ldi	r24, 0x07	; 7
+ 2bc:	d8 2e       	mov	r13, r24
+ 2be:	c6 01       	movw	r24, r12
+ 2c0:	b5 01       	movw	r22, r10
+ 2c2:	2d e1       	ldi	r18, 0x1D	; 29
+ 2c4:	33 ef       	ldi	r19, 0xF3	; 243
+ 2c6:	41 e0       	ldi	r20, 0x01	; 1
+ 2c8:	50 e0       	ldi	r21, 0x00	; 0
+ 2ca:	54 d0       	rcall	.+168    	; 0x374 <__divmodsi4>
+ 2cc:	27 ea       	ldi	r18, 0xA7	; 167
+ 2ce:	31 e4       	ldi	r19, 0x41	; 65
+ 2d0:	40 e0       	ldi	r20, 0x00	; 0
+ 2d2:	50 e0       	ldi	r21, 0x00	; 0
+ 2d4:	36 d0       	rcall	.+108    	; 0x342 <__mulsi3>
+ 2d6:	7b 01       	movw	r14, r22
+ 2d8:	8c 01       	movw	r16, r24
+ 2da:	c6 01       	movw	r24, r12
+ 2dc:	b5 01       	movw	r22, r10
+ 2de:	2d e1       	ldi	r18, 0x1D	; 29
+ 2e0:	33 ef       	ldi	r19, 0xF3	; 243
+ 2e2:	41 e0       	ldi	r20, 0x01	; 1
+ 2e4:	50 e0       	ldi	r21, 0x00	; 0
+ 2e6:	46 d0       	rcall	.+140    	; 0x374 <__divmodsi4>
+ 2e8:	ca 01       	movw	r24, r20
+ 2ea:	b9 01       	movw	r22, r18
+ 2ec:	2c ee       	ldi	r18, 0xEC	; 236
+ 2ee:	34 ef       	ldi	r19, 0xF4	; 244
+ 2f0:	4f ef       	ldi	r20, 0xFF	; 255
+ 2f2:	5f ef       	ldi	r21, 0xFF	; 255
+ 2f4:	26 d0       	rcall	.+76     	; 0x342 <__mulsi3>
+ 2f6:	6e 0d       	add	r22, r14
+ 2f8:	7f 1d       	adc	r23, r15
+ 2fa:	80 1f       	adc	r24, r16
+ 2fc:	91 1f       	adc	r25, r17
+ 2fe:	97 ff       	sbrs	r25, 7
+ 300:	04 c0       	rjmp	.+8      	; 0x30a <do_rand+0x7a>
+ 302:	61 50       	subi	r22, 0x01	; 1
+ 304:	70 40       	sbci	r23, 0x00	; 0
+ 306:	80 40       	sbci	r24, 0x00	; 0
+ 308:	90 48       	sbci	r25, 0x80	; 128
+ 30a:	68 83       	st	Y, r22
+ 30c:	79 83       	std	Y+1, r23	; 0x01
+ 30e:	8a 83       	std	Y+2, r24	; 0x02
+ 310:	9b 83       	std	Y+3, r25	; 0x03
+ 312:	9b 01       	movw	r18, r22
+ 314:	3f 77       	andi	r19, 0x7F	; 127
+ 316:	c9 01       	movw	r24, r18
+ 318:	cd b7       	in	r28, 0x3d	; 61
+ 31a:	de b7       	in	r29, 0x3e	; 62
+ 31c:	ea e0       	ldi	r30, 0x0A	; 10
+ 31e:	69 c0       	rjmp	.+210    	; 0x3f2 <__epilogue_restores__+0x10>
+
+00000320 <rand_r>:
+ 320:	b7 df       	rcall	.-146    	; 0x290 <do_rand>
+ 322:	08 95       	ret
+
+00000324 <rand>:
+ 324:	80 e6       	ldi	r24, 0x60	; 96
+ 326:	90 e0       	ldi	r25, 0x00	; 0
+ 328:	b3 df       	rcall	.-154    	; 0x290 <do_rand>
+ 32a:	08 95       	ret
+
+0000032c <srand>:
+ 32c:	a0 e0       	ldi	r26, 0x00	; 0
+ 32e:	b0 e0       	ldi	r27, 0x00	; 0
+ 330:	80 93 60 00 	sts	0x0060, r24
+ 334:	90 93 61 00 	sts	0x0061, r25
+ 338:	a0 93 62 00 	sts	0x0062, r26
+ 33c:	b0 93 63 00 	sts	0x0063, r27
+ 340:	08 95       	ret
+
+00000342 <__mulsi3>:
+ 342:	ff 27       	eor	r31, r31
+ 344:	ee 27       	eor	r30, r30
+ 346:	bb 27       	eor	r27, r27
+ 348:	aa 27       	eor	r26, r26
+
+0000034a <__mulsi3_loop>:
+ 34a:	60 ff       	sbrs	r22, 0
+ 34c:	04 c0       	rjmp	.+8      	; 0x356 <__mulsi3_skip1>
+ 34e:	a2 0f       	add	r26, r18
+ 350:	b3 1f       	adc	r27, r19
+ 352:	e4 1f       	adc	r30, r20
+ 354:	f5 1f       	adc	r31, r21
+
+00000356 <__mulsi3_skip1>:
+ 356:	22 0f       	add	r18, r18
+ 358:	33 1f       	adc	r19, r19
+ 35a:	44 1f       	adc	r20, r20
+ 35c:	55 1f       	adc	r21, r21
+ 35e:	96 95       	lsr	r25
+ 360:	87 95       	ror	r24
+ 362:	77 95       	ror	r23
+ 364:	67 95       	ror	r22
+ 366:	89 f7       	brne	.-30     	; 0x34a <__mulsi3_loop>
+ 368:	00 97       	sbiw	r24, 0x00	; 0
+ 36a:	76 07       	cpc	r23, r22
+ 36c:	71 f7       	brne	.-36     	; 0x34a <__mulsi3_loop>
+
+0000036e <__mulsi3_exit>:
+ 36e:	cf 01       	movw	r24, r30
+ 370:	bd 01       	movw	r22, r26
+ 372:	08 95       	ret
+
+00000374 <__divmodsi4>:
+ 374:	97 fb       	bst	r25, 7
+ 376:	09 2e       	mov	r0, r25
+ 378:	05 26       	eor	r0, r21
+ 37a:	0e d0       	rcall	.+28     	; 0x398 <__divmodsi4_neg1>
+ 37c:	57 fd       	sbrc	r21, 7
+ 37e:	04 d0       	rcall	.+8      	; 0x388 <__divmodsi4_neg2>
+ 380:	4b d0       	rcall	.+150    	; 0x418 <__udivmodsi4>
+ 382:	0a d0       	rcall	.+20     	; 0x398 <__divmodsi4_neg1>
+ 384:	00 1c       	adc	r0, r0
+ 386:	38 f4       	brcc	.+14     	; 0x396 <__divmodsi4_exit>
+
+00000388 <__divmodsi4_neg2>:
+ 388:	50 95       	com	r21
+ 38a:	40 95       	com	r20
+ 38c:	30 95       	com	r19
+ 38e:	21 95       	neg	r18
+ 390:	3f 4f       	sbci	r19, 0xFF	; 255
+ 392:	4f 4f       	sbci	r20, 0xFF	; 255
+ 394:	5f 4f       	sbci	r21, 0xFF	; 255
+
+00000396 <__divmodsi4_exit>:
+ 396:	08 95       	ret
+
+00000398 <__divmodsi4_neg1>:
+ 398:	f6 f7       	brtc	.-4      	; 0x396 <__divmodsi4_exit>
+ 39a:	90 95       	com	r25
+ 39c:	80 95       	com	r24
+ 39e:	70 95       	com	r23
+ 3a0:	61 95       	neg	r22
+ 3a2:	7f 4f       	sbci	r23, 0xFF	; 255
+ 3a4:	8f 4f       	sbci	r24, 0xFF	; 255
+ 3a6:	9f 4f       	sbci	r25, 0xFF	; 255
+ 3a8:	08 95       	ret
+
+000003aa <__prologue_saves__>:
+ 3aa:	2f 92       	push	r2
+ 3ac:	3f 92       	push	r3
+ 3ae:	4f 92       	push	r4
+ 3b0:	5f 92       	push	r5
+ 3b2:	6f 92       	push	r6
+ 3b4:	7f 92       	push	r7
+ 3b6:	8f 92       	push	r8
+ 3b8:	9f 92       	push	r9
+ 3ba:	af 92       	push	r10
+ 3bc:	bf 92       	push	r11
+ 3be:	cf 92       	push	r12
+ 3c0:	df 92       	push	r13
+ 3c2:	ef 92       	push	r14
+ 3c4:	ff 92       	push	r15
+ 3c6:	0f 93       	push	r16
+ 3c8:	1f 93       	push	r17
+ 3ca:	cf 93       	push	r28
+ 3cc:	df 93       	push	r29
+ 3ce:	cd b7       	in	r28, 0x3d	; 61
+ 3d0:	de b7       	in	r29, 0x3e	; 62
+ 3d2:	ca 1b       	sub	r28, r26
+ 3d4:	db 0b       	sbc	r29, r27
+ 3d6:	0f b6       	in	r0, 0x3f	; 63
+ 3d8:	f8 94       	cli
+ 3da:	de bf       	out	0x3e, r29	; 62
+ 3dc:	0f be       	out	0x3f, r0	; 63
+ 3de:	cd bf       	out	0x3d, r28	; 61
+ 3e0:	09 94       	ijmp
+
+000003e2 <__epilogue_restores__>:
+ 3e2:	2a 88       	ldd	r2, Y+18	; 0x12
+ 3e4:	39 88       	ldd	r3, Y+17	; 0x11
+ 3e6:	48 88       	ldd	r4, Y+16	; 0x10
+ 3e8:	5f 84       	ldd	r5, Y+15	; 0x0f
+ 3ea:	6e 84       	ldd	r6, Y+14	; 0x0e
+ 3ec:	7d 84       	ldd	r7, Y+13	; 0x0d
+ 3ee:	8c 84       	ldd	r8, Y+12	; 0x0c
+ 3f0:	9b 84       	ldd	r9, Y+11	; 0x0b
+ 3f2:	aa 84       	ldd	r10, Y+10	; 0x0a
+ 3f4:	b9 84       	ldd	r11, Y+9	; 0x09
+ 3f6:	c8 84       	ldd	r12, Y+8	; 0x08
+ 3f8:	df 80       	ldd	r13, Y+7	; 0x07
+ 3fa:	ee 80       	ldd	r14, Y+6	; 0x06
+ 3fc:	fd 80       	ldd	r15, Y+5	; 0x05
+ 3fe:	0c 81       	ldd	r16, Y+4	; 0x04
+ 400:	1b 81       	ldd	r17, Y+3	; 0x03
+ 402:	aa 81       	ldd	r26, Y+2	; 0x02
+ 404:	b9 81       	ldd	r27, Y+1	; 0x01
+ 406:	ce 0f       	add	r28, r30
+ 408:	d1 1d       	adc	r29, r1
+ 40a:	0f b6       	in	r0, 0x3f	; 63
+ 40c:	f8 94       	cli
+ 40e:	de bf       	out	0x3e, r29	; 62
+ 410:	0f be       	out	0x3f, r0	; 63
+ 412:	cd bf       	out	0x3d, r28	; 61
+ 414:	ed 01       	movw	r28, r26
+ 416:	08 95       	ret
+
+00000418 <__udivmodsi4>:
+ 418:	a1 e2       	ldi	r26, 0x21	; 33
+ 41a:	1a 2e       	mov	r1, r26
+ 41c:	aa 1b       	sub	r26, r26
+ 41e:	bb 1b       	sub	r27, r27
+ 420:	fd 01       	movw	r30, r26
+ 422:	0d c0       	rjmp	.+26     	; 0x43e <__udivmodsi4_ep>
+
+00000424 <__udivmodsi4_loop>:
+ 424:	aa 1f       	adc	r26, r26
+ 426:	bb 1f       	adc	r27, r27
+ 428:	ee 1f       	adc	r30, r30
+ 42a:	ff 1f       	adc	r31, r31
+ 42c:	a2 17       	cp	r26, r18
+ 42e:	b3 07       	cpc	r27, r19
+ 430:	e4 07       	cpc	r30, r20
+ 432:	f5 07       	cpc	r31, r21
+ 434:	20 f0       	brcs	.+8      	; 0x43e <__udivmodsi4_ep>
+ 436:	a2 1b       	sub	r26, r18
+ 438:	b3 0b       	sbc	r27, r19
+ 43a:	e4 0b       	sbc	r30, r20
+ 43c:	f5 0b       	sbc	r31, r21
+
+0000043e <__udivmodsi4_ep>:
+ 43e:	66 1f       	adc	r22, r22
+ 440:	77 1f       	adc	r23, r23
+ 442:	88 1f       	adc	r24, r24
+ 444:	99 1f       	adc	r25, r25
+ 446:	1a 94       	dec	r1
+ 448:	69 f7       	brne	.-38     	; 0x424 <__udivmodsi4_loop>
+ 44a:	60 95       	com	r22
+ 44c:	70 95       	com	r23
+ 44e:	80 95       	com	r24
+ 450:	90 95       	com	r25
+ 452:	9b 01       	movw	r18, r22
+ 454:	ac 01       	movw	r20, r24
+ 456:	bd 01       	movw	r22, r26
+ 458:	cf 01       	movw	r24, r30
+ 45a:	08 95       	ret
+
+0000045c <_exit>:
+ 45c:	f8 94       	cli
+
+0000045e <__stop_program>:
+ 45e:	ff cf       	rjmp	.-2      	; 0x45e <__stop_program>
