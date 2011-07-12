@@ -89,7 +89,7 @@ int main(void) {
 		for(;loop>0;loop--){
 			
 			//how many times to call the servo routine
-			char reps=limited_random(3,20); 
+			char reps=limited_random(3,25); 
 
 			//the angle for the servos.
 			char x=limited_random(0,180);   
